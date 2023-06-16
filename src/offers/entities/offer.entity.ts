@@ -20,7 +20,7 @@ export class OfferEntity {
   updatedAt: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.offers)
-  owner: UserEntity;
+  user: UserEntity;
 
   @ManyToOne(() => WishEntity, (wish) => wish.offers)
   item: WishEntity;

@@ -1,6 +1,6 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './entities/create-user.dto';
 import { UserEntity } from './entities/user.entity';
 import { BcryptService } from 'nest-bcrypt';
@@ -14,26 +14,23 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    try {
-      const { password } = createUserDto;
-      const hash = await this.bcryptService.hash(password, 10);
-      const user = await this.userRepository.create({
-        ...createUserDto,
-        password: hash,
-      });
+    const { password, email, username } = createUserDto;
 
-      return this.userRepository.save(user);
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        const err = error.driverError;
-
-        if (err.code === '23505') {
-          throw new ConflictException(
-            'Пользователь с таким именем или почтой уже существует',
-          );
-        }
-      }
+    const checkEmail = await this.findMany(email);
+    const checkUsername = await this.findMany(username);
+    if (checkEmail || checkUsername) {
+      throw new ConflictException(
+        'Пользователь с таким именем или почтой уже существует',
+      );
     }
+
+    const hash = await this.bcryptService.hash(password, 10);
+    const user = await this.userRepository.create({
+      ...createUserDto,
+      password: hash,
+    });
+
+    return this.userRepository.save(user);
   }
 
   async findById(id: number) {

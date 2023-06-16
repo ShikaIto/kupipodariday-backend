@@ -4,7 +4,6 @@ import { WishEntity } from './entities/wish.entity';
 import { Repository } from 'typeorm';
 import { CreateWishDto } from './entities/create-wish.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
-import { OfferEntity } from 'src/offers/entities/offer.entity';
 
 @Injectable()
 export class WishService {
@@ -24,6 +23,10 @@ export class WishService {
 
   async findByOwnerId(id: number) {
     const wishes = await this.wishRepository.find({
+      relations: {
+        owner: true,
+        offers: { user: true },
+      },
       where: { owner: { id } },
     });
     return wishes;
@@ -33,7 +36,7 @@ export class WishService {
     const wish = await this.wishRepository.findOne({
       relations: {
         owner: true,
-        offers: true,
+        offers: { user: true },
       },
       where: { id },
     });
@@ -53,15 +56,12 @@ export class WishService {
     wish = await this.findById(id);
     return wish;
   }
-  async updateWithOffer(id: number, amount: number, offer: OfferEntity) {
-    let wish = await this.findById(id);
-    await this.wishRepository.update(id, {
-      updatedAt: new Date(),
-      offers: [...wish.offers, offer],
-      raised: wish.raised + amount,
-    });
-    wish = await this.findById(id);
-    return wish;
+
+  async updateRaised(wish: WishEntity, amount: number) {
+    return this.wishRepository.update(
+      { id: wish.id },
+      { raised: wish.raised + amount },
+    );
   }
 
   async delete(id: number, owner: UserEntity) {
