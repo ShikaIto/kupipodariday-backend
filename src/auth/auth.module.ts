@@ -17,6 +17,7 @@ import { BcryptModule } from 'nest-bcrypt';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_KEY'),
+        signOptions: { expiresIn: '24h' },
       }),
       inject: [ConfigService],
     }),

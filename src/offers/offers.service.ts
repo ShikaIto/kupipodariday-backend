@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OfferEntity } from './entities/offer.entity';
 import { Repository } from 'typeorm';
-import { CreateOfferDto } from './entities/create-offer.dto';
+import { CreateOfferDto } from './dto/create-offer.dto';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { WishService } from 'src/wishes/wishes.service';
 
